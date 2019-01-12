@@ -2,6 +2,7 @@ package com.zk;
 
 import org.apache.zookeeper.*;
 import org.apache.zookeeper.data.ACL;
+import org.apache.zookeeper.data.Stat;
 
 import java.io.IOException;
 import java.util.List;
@@ -67,13 +68,23 @@ public class ZKNodeOperator implements Watcher {
     }
 
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws Exception {
         ZKNodeOperator zkNodeOperator = new ZKNodeOperator(zkServerPath);
 
+        /*
+         // 创建节点
         zkNodeOperator.createZKNode("/test-delete-node1","123".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        */
 
+
+        // 修改data的时候需要加上版本号，如果版本号不一致会抛出异常：BadVersion
+        /*Stat status = zkNodeOperator.getZooKeeper().setData("/test-delete-node1","xyz".getBytes(),0);
+        System.out.println(status.getVersion());*/
+
+        // 删除节点操作。 也需要加上版本号，如果版本号不一致会抛出异常：BadVersion
+        // 在节点删除成功之后，不会返回通知。所以需要使用一个日志的方式进行回调
         String ctx = "{'delete':'test-delete-node1'}";
-        zkNodeOperator.getZooKeeper().delete("/test-delete-node1",0,new DeleteCallBack(),ctx);
+        zkNodeOperator.getZooKeeper().delete("/test-delete-node1",1,new DeleteCallBack(),ctx);
         Thread.sleep(2000);
     }
     public ZooKeeper getZooKeeper() {
