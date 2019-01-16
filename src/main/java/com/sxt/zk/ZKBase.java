@@ -1,10 +1,9 @@
 package com.sxt.zk;
 
-import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.Watcher;
-import org.apache.zookeeper.ZooKeeper;
+import org.apache.zookeeper.*;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -47,8 +46,28 @@ public class ZKBase implements Watcher{
         }
     }
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, KeeperException {
         ZKBase zkBase = new ZKBase(CONNECT_ADDR);
         countDown.await();
+        //String ret = zkBase.getZooKeeper().create("/aaaaaa","lianhuajie".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+        //System.out.println("返回值： " + ret);
+
+        List<String > list = zkBase.getZooKeeper().getChildren("/test",false);
+
+        for(String path : list) {
+            System.out.println(path);
+            String realPath = "/test/" + path;
+            System.out.println(new String (zkBase.getZooKeeper().getData(realPath,false,null)));
+        }
+        // 163208757255,163208757255,1547633550420,1547633550420,0,0,0,0,2,0,163208757255
+        System.out.println(zkBase.getZooKeeper().exists("/fj",false));
+    }
+
+    public ZooKeeper getZooKeeper() {
+        return zooKeeper;
+    }
+
+    public void setZooKeeper(ZooKeeper zooKeeper) {
+        this.zooKeeper = zooKeeper;
     }
 }
